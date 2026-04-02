@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react"; // Added!
 import { useTheme } from "../App";
 
 export default function Hero() {
@@ -13,7 +14,7 @@ export default function Hero() {
   const { isDark } = useTheme();
   const threeRefs = useRef({});
 
-  // Three.js scene
+  // Three.js scene (Unchanged - your logic here is excellent)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -163,70 +164,70 @@ export default function Hero() {
     if (refs.torusMat) refs.torusMat.color.set(color);
   }, [isDark]);
 
-  // GSAP text animations
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.3 });
+  // UPGRADED: GSAP text animations using useGSAP
+  useGSAP(() => {
+    const tl = gsap.timeline({ delay: 0.3 });
 
-      // Heading chars
-      const headingChars =
-        headingRef.current?.querySelectorAll(".char") || [];
-      tl.from(headingChars, {
-        y: 120,
-        rotateX: -80,
+    // Heading chars
+    const headingChars = headingRef.current?.querySelectorAll(".char") || [];
+    tl.from(headingChars, {
+      y: 120,
+      rotateX: -80,
+      opacity: 0,
+      stagger: 0.03,
+      duration: 1.2,
+      ease: "power4.out",
+    });
+
+    const subChars = subRef.current?.querySelectorAll(".char") || [];
+    tl.from(
+      subChars,
+      {
+        y: 60,
         opacity: 0,
-        stagger: 0.03,
-        duration: 1.2,
-        ease: "power4.out",
-      });
+        stagger: 0.02,
+        duration: 0.8,
+        ease: "power3.out",
+      },
+      "-=0.6"
+    );
 
-      const subChars = subRef.current?.querySelectorAll(".char") || [];
-      tl.from(
-        subChars,
-        {
-          y: 60,
-          opacity: 0,
-          stagger: 0.02,
-          duration: 0.8,
-          ease: "power3.out",
-        },
-        "-=0.6"
-      );
+    tl.from(
+      tagRef.current,
+      {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out",
+      },
+      "-=0.4"
+    );
 
-      tl.from(
-        tagRef.current,
-        {
-          y: 30,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power3.out",
-        },
-        "-=0.4"
-      );
+    tl.from(
+      scrollRef.current,
+      {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        ease: "power2.out",
+      },
+      "-=0.2"
+    );
+  }, { scope: sectionRef });
 
-      tl.from(
-        scrollRef.current,
-        {
-          opacity: 0,
-          y: 20,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-        "-=0.2"
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
+  // UPGRADED: Added a wrapper to ensure rotationX transforms correctly without clipping the top of the letters
   const splitChars = (text) =>
     text.split("").map((char, i) => (
       <span
         key={i}
-        className="char"
-        style={{ perspective: "600px", display: "inline-block" }}
+        className="inline-block overflow-visible" 
+        style={{ perspective: "1000px" }}
       >
-        {char === " " ? "\u00A0" : char}
+        <span 
+          className="char inline-block origin-bottom" 
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
       </span>
     ));
 
@@ -234,14 +235,15 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative w-full h-screen flex items-center justify-center overflow-hidden"
+      className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-black"
     >
-      <canvas ref={canvasRef} className="hero-canvas" />
+      {/* Absolute positioning for canvas so it stays behind text */}
+      <canvas ref={canvasRef} className="hero-canvas absolute inset-0 z-0 pointer-events-none" />
 
-      <div className="relative z-10 text-center px-4">
+      <div className="relative z-10 text-center px-4 pointer-events-none">
         {/* Tag */}
         <div ref={tagRef} className="mb-6">
-          <span className="font-body text-xs md:text-sm tracking-[0.4em] uppercase opacity-60">
+          <span className="font-body text-xs md:text-sm tracking-[0.4em] uppercase opacity-60 dark:text-white">
             Creative Development Studio
           </span>
         </div>
@@ -249,7 +251,7 @@ export default function Hero() {
         {/* Main heading */}
         <h1
           ref={headingRef}
-          className="font-display text-[12vw] md:text-[9vw] lg:text-[8vw] font-800 leading-[0.9] tracking-tighter"
+          className="font-display text-[12vw] md:text-[9vw] lg:text-[8vw] font-800 leading-[0.9] tracking-tighter dark:text-white"
         >
           {splitChars("ZeroDev")}
         </h1>
@@ -257,13 +259,14 @@ export default function Hero() {
         {/* Sub heading */}
         <h2
           ref={subRef}
-          className="font-display text-[8vw] md:text-[5vw] lg:text-[4.5vw] font-300 tracking-tight text-stroke mt-2"
+          className="font-display text-[8vw] md:text-[5vw] lg:text-[4.5vw] font-300 tracking-tight mt-2 text-transparent"
+          style={{ WebkitTextStroke: isDark ? "1px white" : "1px black" }}
         >
           {splitChars("Studio")}
         </h2>
 
         {/* Description */}
-        <p className="mt-8 font-body text-sm md:text-base max-w-md mx-auto opacity-50 leading-relaxed">
+        <p className="mt-8 font-body text-sm md:text-base max-w-md mx-auto opacity-50 leading-relaxed dark:text-zinc-300">
           We craft immersive digital experiences that push boundaries and
           redefine what's possible on the web.
         </p>
@@ -272,9 +275,9 @@ export default function Hero() {
       {/* Scroll indicator */}
       <div
         ref={scrollRef}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
       >
-        <span className="font-body text-[10px] tracking-[0.3em] uppercase opacity-40">
+        <span className="font-body text-[10px] tracking-[0.3em] uppercase opacity-40 dark:text-white">
           Scroll
         </span>
         <div className="w-[1px] h-12 relative overflow-hidden">
