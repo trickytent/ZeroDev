@@ -133,11 +133,11 @@ export default function Contact() {
 
         <div className="mt-16">
           <a
-            href="mailto:work.roopam05@gmail.com"
+            href="mailto:zerodev.studios@gmail.com"
             className="font-display text-lg md:text-2xl font-500 opacity-60 hover:opacity-100 transition-opacity relative group dark:text-white"
             data-cursor="pointer"
           >
-            work.roopam05@gmail.com
+             zerodev.studios@gmail.com
             <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-black dark:bg-white transition-all duration-500 group-hover:w-full" />
           </a>
         </div>
