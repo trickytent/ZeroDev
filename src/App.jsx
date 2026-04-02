@@ -12,9 +12,9 @@ import Services from "./components/Services";
 import Works from "./components/Works";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-
+import { Analytics } from "@vercel/analytics/next"
 gsap.registerPlugin(ScrollTrigger);
-
+<Analytics />
 export const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
